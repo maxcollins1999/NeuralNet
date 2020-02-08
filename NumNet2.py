@@ -40,7 +40,6 @@ class NumNet2:
     
     wmats = []    #List containing the numpy arrays of the edge weights
     bmats = []    #List containign the numpy arrays of the b matrices
-    sig_param = 1 #Sigmoid function k parameter
     train_images = [] #List of training images
     train_labels = [] #List of corresponding training labels
     
@@ -50,7 +49,6 @@ class NumNet2:
         constructs the initial b matrices.
         """
 
-        
         if noh and nih and nin and nou:
             self.wmats.append(np.zeros((nih,nin)))
             self.bmats.append(np.zeros((nih,1)))
@@ -113,6 +111,45 @@ class NumNet2:
         self.train_images, self.train_labels = phom.getGzipped(train_ims,train_labels)
         for im in self.train_images:
             im.resize((len(im)*len(im[0]),1))
+
+
+    def __sigmoid(self,val):
+        """Returns the value of val on the sigmoid curve
+        """
+        
+        return 1/(1+math.e**(-1*val))
+
+
+    def __sigmoid_prime(self,val):
+        """Returns the value of the derivative of the sigmoid function
+        """
+
+        return math.e**(-1*val)/((1+math.e**(-1*val))**2)
+
+
+    def forwardProp(self, a1mat):
+        """Takes the initial input and performs forward propagation and returns 
+        a list of a matrices
+        """
+
+        amats = []
+        amats.append(a1mat)
+        for i, wmat in enumerate(self.wmats):
+            amats.append(self.__sigmoid(wmat@amats[i]+self.bmats[i]))
+        return amats
+
+
+    def backProp(self, amats, ymat):
+        """Takes a list of amatrices and a nx1 ymatrix and performs an 
+        iteration of backpropogation.
+        """
+
+        delta_list = [2*(amats[-1]-ymat)*self.__sigmoid_prime(self.wmats[-1]@amats[-2]+self.bmats[-1])]
+        cost_deriv = [delta_list[0]@amats[-2].T]
+        for i, wmat in reversed(list(enumerate(self.wmats[0:-1]))):
+            delta_list.insert(0, (self.wmats[i+1].T@delta_list[0])*self.__sigmoid_prime(wmat@amats[i]+self.bmats[i]))
+            cost_deriv.insert(0, delta_list[0]@amats[i].T)
+        return delta_list, cost_deriv 
 
 ### Tests ######################################################################
  
