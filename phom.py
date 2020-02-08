@@ -55,14 +55,15 @@ def showGrayScale(pic):
     plt.show()
     
     
-def getGzipped(num_images=None):
-    """Strictly reads the gz files used int the number recognition neural 
-    network. These images are (28x28) pixels and are grayscale. Takes the 
-    number of images to read and returns a list of numpy arrays containing the 
-    images and a numpy array of the correct labels
+def getGzipped(im_path, la_path, num_images=None):
+    """Takes the path to the images, path to the labels and an optional number 
+    of images to load.Strictly reads the gz files used int the number 
+    recognition neural network. These images are (28x28) pixels and are 
+    grayscale. Returns a list of numpy arrays containing the images and a 
+    numpy array of the correct labels
     """
     
-    f = gzip.open('Train.gz','r')
+    f = gzip.open(im_path,'r')
 
     image_size = 28
     images = []
@@ -81,7 +82,7 @@ def getGzipped(num_images=None):
                                         #          3rd dimension
     
     
-    f = gzip.open('Train Labels.gz','r')
+    f = gzip.open(la_path,'r')
     f.read(8)
     for i in range(0,len(images)):   
         buf = f.read(1)

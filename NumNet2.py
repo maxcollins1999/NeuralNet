@@ -20,6 +20,10 @@ import phom
 #Global
 import pathlib
 import pickle
+import numpy as np
+import math
+from tqdm import tqdm
+import copy
 
 ################################################################################
 
@@ -68,12 +72,13 @@ class NumNet2:
         """
         for i, w in enumerate(self.wmats):
             print('-----------------------')
-            print('b'+str(i)+'\n')
+            print('w'+str(i)+'\n')
             print(w)
             print(w.shape)
             print('-----------------------')
+            print('b'+str(i)+'\n')
             print(self.bmats[i])
-            print(self.bmats.shape)
+            print(self.bmats[i].shape)
 
 
     def saveState(self):
@@ -84,14 +89,16 @@ class NumNet2:
             'wmats':self.wmats,
             'bmats':self.bmats
         }
-        pickle.dump(dump,'save.txt')
+        with open('save.txt','wb') as fstrm:
+            pickle.dump(dump,fstrm)
 
 
-    def loadState(self)+:
+    def loadState(self):
         """Loads the current object state from the pickle binary file
         """
 
-        dump = pickle.load('save.txt')
+        with open('save.txt','rb') as fstrm:
+            dump = pickle.load(fstrm)
         self.wmats = dump['wmats']
         self.bmats = dump['bmats']
 
@@ -103,7 +110,7 @@ class NumNet2:
         arrays for use in matrix multiplication.
         """
         
-        self.train_images, self.train_labels = phom.getGzipped(n)
+        self.train_images, self.train_labels = phom.getGzipped(train_ims,train_labels)
         for im in self.train_images:
             im.resize((len(im)*len(im[0]),1))
 
