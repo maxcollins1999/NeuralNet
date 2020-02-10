@@ -50,13 +50,13 @@ class NumNet2:
         """
 
         if noh and nih and nin and nou:
-            self.wmats.append(np.zeros((nih,nin)))
-            self.bmats.append(np.zeros((nih,1)))
+            self.wmats.append(np.random.rand(nih,nin))
+            self.bmats.append(np.random.rand(nih,1))
             for i in range(0,noh-1):
-                self.wmats.append(np.zeros((nih,nih)))
-                self.bmats.append(np.zeros((nih,1)))
-            self.wmats.append(np.zeros((nou,nih)))
-            self.bmats.append(np.zeros((nou,1)))
+                self.wmats.append(np.random.rand(nih,nih))
+                self.bmats.append(np.random.rand(nih,1))
+            self.wmats.append(np.random.rand(nou,nih))
+            self.bmats.append(np.random.rand(nou,1))
         elif not (not noh and not nih and not nin and not nou):
             raise AttributeError('Must assign complete network scaffold or no'+\
                                  ' scaffold')
@@ -100,32 +100,6 @@ class NumNet2:
         self.wmats = dump['wmats']
         self.bmats = dump['bmats']
 
-### Private Methods ############################################################
-        
-    def __readPhotos(self):
-        """Takes in the number of photos to be read and reads in the images 
-        that will be used to differentiate numbers and reshapes them into nx1 
-        arrays for use in matrix multiplication.
-        """
-        
-        self.train_images, self.train_labels = phom.getGzipped(train_ims,train_labels)
-        for im in self.train_images:
-            im.resize((len(im)*len(im[0]),1))
-
-
-    def __sigmoid(self,val):
-        """Returns the value of val on the sigmoid curve
-        """
-        
-        return 1/(1+math.e**(-1*val))
-
-
-    def __sigmoid_prime(self,val):
-        """Returns the value of the derivative of the sigmoid function
-        """
-
-        return math.e**(-1*val)/((1+math.e**(-1*val))**2)
-
 
     def forwardProp(self, a1mat):
         """Takes the initial input and performs forward propagation and returns 
@@ -144,12 +118,106 @@ class NumNet2:
         iteration of backpropogation.
         """
 
-        delta_list = [2*(amats[-1]-ymat)*self.__sigmoid_prime(self.wmats[-1]@amats[-2]+self.bmats[-1])]
+        delta_list = [(amats[-1]-ymat)*self.__sigmoid_prime(self.wmats[-1]@amats[-2]+self.bmats[-1])]
         cost_deriv = [delta_list[0]@amats[-2].T]
-        for i, wmat in reversed(list(enumerate(self.wmats[0:-1]))):
+        for i, wmat in reversed(list(enumerate(self.wmats[:-1]))):
             delta_list.insert(0, (self.wmats[i+1].T@delta_list[0])*self.__sigmoid_prime(wmat@amats[i]+self.bmats[i]))
             cost_deriv.insert(0, delta_list[0]@amats[i].T)
         return delta_list, cost_deriv 
+
+
+    def go_to_school(self, alpha, iter):
+        """Takes the gradient descent stepsize and the number of iterations and 
+        performs back and forward propogation. 
+        """
+
+        im_batch, lab_batch = self.__calc_batch(1)
+        i = 0
+        for t in tqdm(range(0, iter)):
+            if i>=len(im_batch):
+                i = 0
+            y= self.__get_y_mat(lab_batch[i][0])
+            amats = self.forwardProp(im_batch[i][0])
+            delta, cost = self.backProp(amats,y)
+            for k, im in enumerate(im_batch[i][1:]):
+                y = self.__get_y_mat(lab_batch[k][0])
+                amats = self.forwardProp(im)
+                delta_list, cost_deriv = self.backProp(amats,y)
+                for j, mat in enumerate(delta_list):
+                    delta[j] = delta[j] + mat
+                for j, mat in enumerate(cost_deriv):
+                    cost[j] = cost[j] + mat
+            for k, mat in enumerate(delta):
+                delta[k] = mat / len(im_batch[i])
+                self.bmats[k] = self.bmats[k] - alpha*delta[k]
+            for k, mat in enumerate(cost):
+                cost[k] = mat / len(im_batch[i])
+                self.wmats[k] = self.wmats[k] - alpha*cost[k]
+            i+=1
+
+
+    def getAccuracy(self):
+        """Determines the current program accuracy
+        """
+
+        count = 0
+        for i, im in enumerate(tqdm(self.train_images)):
+            amats = self.forwardProp(im)
+            number = None
+            conf = 0
+            for k, val in enumerate(amats[-1][:,0]):
+                if val > conf:
+                    number = k
+                    conf = val
+            if number == self.train_labels[i]:
+                count+=1
+        return count/len(self.train_images)
+                
+
+### Private Methods ############################################################
+        
+    def __readPhotos(self):
+        """Takes in the number of photos to be read and reads in the images 
+        that will be used to differentiate numbers and reshapes them into nx1 
+        arrays for use in matrix multiplication.
+        """
+        
+        self.train_images, self.train_labels = phom.getGzipped(train_ims,train_labels)
+        for im in self.train_images:
+            im.resize((len(im)*len(im[0]),1))
+
+
+    def __sigmoid(self,val):
+        """Returns the value of val on the sigmoid curve
+        """
+        
+        return 1/(1+np.exp(-val))
+
+
+    def __sigmoid_prime(self,val):
+        """Returns the value of the derivative of the sigmoid function
+        """
+        return self.__sigmoid(val)*(1-self.__sigmoid(val))
+
+
+    def __calc_batch(self, n):
+        """Takes the size of each batch and randomly splits the training set 
+        into batches that are of the correct size and returns the results.
+        """
+
+        im_batch = [self.train_images[i * n:(i + 1) * n] for i in range((len(self.train_images) + n - 1) // n )]  
+        lab_batch = [self.train_labels[i * n:(i + 1) * n] for i in range((len(self.train_labels) + n - 1) // n )]  
+        return im_batch, lab_batch
+
+
+    def __get_y_mat(self, yval):
+        """Takes the y value and returns the y matrix
+        """
+
+        nums = self.bmats[-1].shape[0]
+        y = np.zeros((nums,1))
+        y[yval,0] = 1
+        return y
 
 ### Tests ######################################################################
  
