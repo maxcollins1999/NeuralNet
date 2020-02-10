@@ -78,7 +78,7 @@ def getGzipped(im_path, la_path, num_images=None):
     data = np.frombuffer(buf, dtype=np.uint8).astype(np.float32)
     data = data.reshape(num_images, image_size, image_size, 1)
     for val in data:
-        images.append(val.squeeze()/255.0)    #REMINDER: Squeeze removes the unused 
+        images.append(val.squeeze()/255)    #REMINDER: Squeeze removes the unused 
                                         #          3rd dimension
     
     

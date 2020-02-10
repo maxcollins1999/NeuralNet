@@ -20,7 +20,13 @@ test = NumNet2(1,16,784,10)
 
 print(test.getAccuracy())
 
-test.go_to_school(1, 100)
+#print(test.train_images[0])
+
+#print(test.wmats[0]@test.train_images[0])
+
+amats = test.forwardProp(test.train_images[0])
+
+test.go_to_school(.5, 100)
 
 print(test.getAccuracy())
 

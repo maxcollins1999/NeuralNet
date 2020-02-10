@@ -122,6 +122,9 @@ class NumNet2:
         cost_deriv = [delta_list[0]@amats[-2].T]
         for i, wmat in reversed(list(enumerate(self.wmats[:-1]))):
             delta_list.insert(0, (self.wmats[i+1].T@delta_list[0])*self.__sigmoid_prime(wmat@amats[i]+self.bmats[i]))
+
+            print(wmat@amats[i]+self.bmats[i])
+
             cost_deriv.insert(0, delta_list[0]@amats[i].T)
         return delta_list, cost_deriv 
 
@@ -131,27 +134,16 @@ class NumNet2:
         performs back and forward propogation. 
         """
 
-        im_batch, lab_batch = self.__calc_batch(1)
         i = 0
         for t in tqdm(range(0, iter)):
-            if i>=len(im_batch):
+            if i>=len(self.train_images):
                 i = 0
-            y= self.__get_y_mat(lab_batch[i][0])
-            amats = self.forwardProp(im_batch[i][0])
+            y= self.__get_y_mat(self.train_labels[i])
+            amats = self.forwardProp(self.train_images[i])
             delta, cost = self.backProp(amats,y)
-            for k, im in enumerate(im_batch[i][1:]):
-                y = self.__get_y_mat(lab_batch[k][0])
-                amats = self.forwardProp(im)
-                delta_list, cost_deriv = self.backProp(amats,y)
-                for j, mat in enumerate(delta_list):
-                    delta[j] = delta[j] + mat
-                for j, mat in enumerate(cost_deriv):
-                    cost[j] = cost[j] + mat
             for k, mat in enumerate(delta):
-                delta[k] = mat / len(im_batch[i])
                 self.bmats[k] = self.bmats[k] - alpha*delta[k]
             for k, mat in enumerate(cost):
-                cost[k] = mat / len(im_batch[i])
                 self.wmats[k] = self.wmats[k] - alpha*cost[k]
             i+=1
 
