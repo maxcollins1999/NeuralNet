@@ -1,34 +1,29 @@
-from NumNet2 import NumNet2
+from NumNet import NumNet
+from ClassicalNet import ClassicalNet
 import numpy as np
+import phom
 
 np.set_printoptions(threshold=np.inf)
 
 np.random.seed(69)
 
-test = NumNet2(1,16,784,10)
+test = NumNet()
 
-#x = test.forwardProp(test.train_images[0])
+test.loadState()
 
-#test.dispState()
+#print(test.getAccuracy(atype='test'))
 
-#y = np.zeros((10,1))
+#test.go_to_school(.1,1,5000000)
 
-#y[test.train_labels[0]] = 1
+#print(test.getAccuracy(atype='test'))
 
+#est.saveState()
 
-#a,b = test.backProp(x,y)
+pic = phom.formpho('Num Images\\height.jpg')
 
-print(test.getAccuracy())
+phom.showGrayScale(pic)
 
-#print(test.train_images[0])
-
-#print(test.wmats[0]@test.train_images[0])
-
-amats = test.forwardProp(test.train_images[0])
-
-test.go_to_school(.5, 100)
-
-print(test.getAccuracy())
+print(test.classify(pic))
 
 #test.dispState()
 

@@ -32,7 +32,7 @@ def formpho(fname):
         temp[xpos:xpos+x,ypos:ypos+y]=rpic
         fpic=temp
         
-    return fpic
+    return (255-fpic)/255
 
 
 def rgb2gray(rgb):
@@ -51,7 +51,7 @@ def showGrayScale(pic):
     """Prints the grayscale image to the terminal
     """
     
-    plt.imshow(pic,cmap='gray',vmin=0, vmax=255)
+    plt.imshow(pic*255,cmap='gray',vmin=0, vmax=255)
     plt.show()
     
     

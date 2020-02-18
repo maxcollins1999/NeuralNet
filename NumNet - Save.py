@@ -50,13 +50,13 @@ class NumNet2:
         """
 
         if noh and nih and nin and nou:
-            self.wmats.append(np.random.rand(nih,nin))
-            self.bmats.append(np.random.rand(nih,1))
+            self.wmats.append(np.random.randn(nih,nin))
+            self.bmats.append(np.random.randn(nih,1))
             for i in range(0,noh-1):
-                self.wmats.append(np.random.rand(nih,nih))
-                self.bmats.append(np.random.rand(nih,1))
-            self.wmats.append(np.random.rand(nou,nih))
-            self.bmats.append(np.random.rand(nou,1))
+                self.wmats.append(np.random.randn(nih,nih))
+                self.bmats.append(np.random.randn(nih,1))
+            self.wmats.append(np.random.randn(nou,nih))
+            self.bmats.append(np.random.randn(nou,1))
         elif not (not noh and not nih and not nin and not nou):
             raise AttributeError('Must assign complete network scaffold or no'+\
                                  ' scaffold')
@@ -122,9 +122,6 @@ class NumNet2:
         cost_deriv = [delta_list[0]@amats[-2].T]
         for i, wmat in reversed(list(enumerate(self.wmats[:-1]))):
             delta_list.insert(0, (self.wmats[i+1].T@delta_list[0])*self.__sigmoid_prime(wmat@amats[i]+self.bmats[i]))
-
-            print(wmat@amats[i]+self.bmats[i])
-
             cost_deriv.insert(0, delta_list[0]@amats[i].T)
         return delta_list, cost_deriv 
 
