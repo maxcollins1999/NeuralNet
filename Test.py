@@ -19,7 +19,7 @@ test.loadState()
 
 #est.saveState()
 
-pic = phom.formpho('Num Images\\height.jpg')
+pic = phom.formpho('Num Images\\hfour.jpg')
 
 phom.showGrayScale(pic)
 

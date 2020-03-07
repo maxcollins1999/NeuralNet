@@ -1,0 +1,24 @@
+## Synopsis
+
+A basic neural network classifer built without the use of a machine learning library.
+
+## Contents
+README - README file.
+
+ClassicalNet.py - The classic neural network class.
+
+NumNet.py - The number neural network class that extends the classic neural network.
+
+phom.py - A module of image processing functions.
+
+save.txt - A save file of the number neural network weights.
+
+test.py - A script to test the neural network against one of the images in Num Images
+
+## Dependencies
+
+NumNet.py <- ClassicalNet.py
+
+ClassicalNet.py <- phom.py
+
+test.py <- NumNet.py, save.txt, Num Images
